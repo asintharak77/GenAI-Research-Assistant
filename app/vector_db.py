@@ -1,15 +1,14 @@
 
+
 import chromadb
-from chromadb.config import Settings
-from typing import List
+from typing import List, Dict
 
-# New way to initialize Chroma client (as of mid-2024)
+# Initialize Chroma client
 client = chromadb.PersistentClient(path="chromadb_store")
+collection = client.get_or_create_collection(name="journal_chunks", metadata={"hnsw:space": "cosine"})
 
-# Create or get collection
-collection = client.get_or_create_collection(name="journal_chunks")
-
-def add_chunk_to_db(id: str, embedding: List[float], metadata: dict):
+def add_chunk_to_db(id: str, embedding: List[float], metadata: Dict):
+    print(f"Embedding preview for {id}: {embedding[:5]}")  # Debug line
     collection.add(
         ids=[id],
         embeddings=[embedding],
@@ -17,30 +16,19 @@ def add_chunk_to_db(id: str, embedding: List[float], metadata: dict):
         documents=[metadata["text"]]
     )
 
-def query_chunks(embedding: List[float], k=10):
-    return collection.query(
+def query_chunks(embedding: List[float], k: int):
+    results = collection.query(
         query_embeddings=[embedding],
-        n_results=k
+        n_results=k,
+        include=["distances", "metadatas", "documents"]  # include everything needed
     )
+    print(f"Search raw results: {results}")  # for debugging
+    return results
 
-def get_all_by_doc_id(doc_id: str):
-    all_data = collection.get(include=["documents", "metadatas"])
+def get_chunks_by_doc_id(doc_id: str):
+    results = collection.get(
+        where={"source_doc_id": doc_id}
+    )
+    print(f"Debug: get_chunks_by_doc_id('{doc_id}') results: {results}")
+    return results
 
-    matching_documents = []
-    matching_metadatas = []
-
-    for doc, meta in zip(all_data["documents"], all_data["metadatas"]):
-        if isinstance(meta, dict) and meta.get("source_doc_id") == doc_id:
-            matching_documents.append(doc)
-            matching_metadatas.append(meta)
-
-    return {
-        "documents": [matching_documents],
-        "metadatas": [matching_metadatas]
-    }
-
-
-
-
-def get_all_chunks():
-    return collection.get()
