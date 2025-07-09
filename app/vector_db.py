@@ -1,7 +1,9 @@
-
-
+import os
 import chromadb
 from typing import List, Dict
+
+# Ensure ChromaDB directory exists
+os.makedirs("chromadb_store", exist_ok=True)
 
 # Initialize Chroma client
 client = chromadb.PersistentClient(path="chromadb_store")
