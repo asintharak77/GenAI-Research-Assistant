@@ -175,6 +175,6 @@ I have explored some of the optional stretch features. They are:
 Dependencies are listed in ```requirements.txt```
 
 ## Clear DB
-Type ```rm -rf chroma_db``` in gitbash
+Type ``` rm -rf chromadb_store``` to clear the DB
 
 
