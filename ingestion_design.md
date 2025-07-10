@@ -173,3 +173,11 @@ Each chunk is added to the journal_chunks collection in ChromaDB.
 > - `id` is stored using the `ids` parameter.  
 > - `text` is stored using the `documents` parameter.  
 > - Both are reattached manually during retrieval (e.g., similarity search) for accurate formatting and citation in responses.
+
+
+
+# Vector Database Choice
+
+For the vector database, I selected ChromaDB due to its developer-friendly features and ease of use. As an open-source and in-memory database, it is simple to set up and ideal for rapid prototyping. ChromaDB's API-first design also simplifies the development process, which is especially beneficial for this project.
+
+I also considered that ChromaDB is specifically designed to work with large language model (LLM) applications, making it a natural fit for this challenge. Its ability to store embeddings and metadata, along with its fast and efficient similarity search, are all features that align with the project's requirements.
