@@ -144,7 +144,7 @@ Function GenerateUniqueID(base_string):
 // Function: Filter null values from metadata
 Function FilterNullValues(metadata):
     Return {key: value for key, value in metadata if value is not null}
-
+```
 
 ## Code Explanation
 
