@@ -5,9 +5,10 @@ This is a research assistant tool powered by OpenAI embeddings and LLMs. It inge
 ## Features
 
 * Upload journal chunks via URL or JSON  
-* Semantic search using OpenAI embeddings  
+* Semantic search using OpenAI embeddings
+* Search documents using journal id
 * Gradio chatbot UI with:  
-  * Q & A with tehe help of LLM
+  * Q & A with the help of LLM
   * Source citations (with similarity score and links)  
   * Usage count chart (Plotly)  
 * Vector search via ChromaDB  
