@@ -4,12 +4,13 @@ from openai import OpenAI
 import plotly.express as px
 import os
 from dotenv import load_dotenv
+import requests
 
 # Load API key from .env
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-API_BASE = "http://localhost:8000"  # your FastAPI server
+API_BASE = "http://localhost:8000" 
 
 def ask_question(question, top_k=5, min_score=0.3):
     # Step 1: Call similarity search API
@@ -89,21 +90,72 @@ def plot_chart(chunks):
     return fig
 
 
+def get_doc_ids():
+    try:
+        res = requests.get(f"{API_BASE}/api/debug/list_all_chunks")
+        res.raise_for_status()
+        metadatas = res.json().get("metadatas", [])
+        doc_ids = list(set(md["source_doc_id"] for md in metadatas if "source_doc_id" in md))
+        return sorted(doc_ids)
+    except Exception as e:
+        print(f"Error fetching doc IDs: {e}")
+        return []
+
+
+
+def get_summary(doc_id):
+    try:
+        res = requests.get(f"{API_BASE}/api/summary/{doc_id}")
+        res.raise_for_status()
+        return res.json().get("summary", "No summary available.")
+    except Exception as e:
+        return f"Error generating summary: {e}"
+
+def compare_docs(doc1, doc2):
+    try:
+        res = requests.post(f"{API_BASE}/api/compare", json={
+            "doc1_id": doc1,
+            "doc2_id": doc2
+        })
+        res.raise_for_status()
+        return res.json().get("comparison", "No comparison available.")
+    except Exception as e:
+        return f"Error comparing documents: {e}"
+
+
+
+doc_ids = get_doc_ids()
+
 # Gradio UI
 with gr.Blocks() as demo:
-    gr.Markdown("## 🤖 GenAI Research Assistant Chatbot")
+    gr.Markdown("## GenAI Research Assistant")
 
-    question = gr.Textbox(label="Ask a question", placeholder="e.g., What are the uses of velvet bean?")
-    submit = gr.Button("Submit")
+    with gr.Tab("Ask a Question"):
+        question = gr.Textbox(label="Ask a question", placeholder="e.g., What are the uses of velvet bean?")
+        submit = gr.Button("Submit")
+        answer = gr.Textbox(label="Answer", lines=5)
+        citations = gr.Textbox(label="Citations", lines=3)
+        show_chart = gr.Button("Show Chart")
+        chart = gr.Plot()
+        chunk_cache = gr.State()
 
-    answer = gr.Textbox(label="Answer", lines=5)
-    citations = gr.Textbox(label="Citations", lines=3)
-    show_chart = gr.Button("Show Chart")
-    chart = gr.Plot()
+        submit.click(fn=ask_question, inputs=[question], outputs=[answer, citations, chunk_cache])
+        show_chart.click(fn=plot_chart, inputs=[chunk_cache], outputs=chart)
 
-    chunk_cache = gr.State()
+    with gr.Tab("Summarise Document"):
+        gr.Markdown("### Select a document to summarise")
+        doc_id = gr.Dropdown(choices=doc_ids, label="Select Document to Summarize")
+        sum_btn = gr.Button("Summarise")
+        summary_out = gr.Markdown(label="Summary")
+        sum_btn.click(fn=get_summary, inputs=doc_id, outputs=summary_out)
 
-    submit.click(fn=ask_question, inputs=[question], outputs=[answer, citations, chunk_cache])
-    show_chart.click(fn=plot_chart, inputs=[chunk_cache], outputs=chart)
+    with gr.Tab("Compare Papers"):
+        gr.Markdown("### Select Two Documents to Compare")
+        with gr.Row():
+            doc1 = gr.Dropdown(choices=doc_ids, label="Paper A", interactive=True)
+            doc2 = gr.Dropdown(choices=doc_ids, label="Paper B", interactive=True)
+        cmp_btn = gr.Button("Compare")
+        cmp_out = gr.Markdown(label="Comparison")
+        cmp_btn.click(fn=compare_docs, inputs=[doc1, doc2], outputs=cmp_out)
 
 demo.launch()

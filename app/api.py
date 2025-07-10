@@ -5,10 +5,17 @@ from pydantic import BaseModel, HttpUrl
 from typing import List, Optional
 import requests
 import json
+from fastapi import Query
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+from pydantic import BaseModel
 from app.vector_db import collection
-
 from app.embedding import get_embedding
 from app.vector_db import add_chunk_to_db, query_chunks, get_chunks_by_doc_id
+
+load_dotenv()
+client = OpenAI()
 
 router = APIRouter()
 
@@ -134,14 +141,14 @@ def search_similar_chunks(request: SearchRequest):
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
 # Endpoint to get chunks by journal ID
-@router.get("/api/{journal_id}")
-def get_journal_chunks(journal_id: str):
+@router.get("/api/{doc_id}")
+def get_document_chunks(doc_id: str):
     try:
-        results = get_chunks_by_doc_id(journal_id)
-        print(f"Debug: get_chunks_by_doc_id('{journal_id}') results: {results}")
+        results = get_chunks_by_doc_id(doc_id)
+        print(f"Debug: get_chunks_by_doc_id('{doc_id}') results: {results}")
 
         if not results.get('ids') or not results['ids']:
-            raise HTTPException(status_code=404, detail=f"No chunks found for journal_id: {journal_id}")
+            raise HTTPException(status_code=404, detail=f"No chunks found for journal_id: {doc_id}")
 
         formatted = []
         for doc_id, doc, metadata in zip(results['ids'], results['documents'], results['metadatas']):
@@ -159,7 +166,7 @@ def get_journal_chunks(journal_id: str):
             formatted.append(chunk_data)
 
         if not formatted:
-            raise HTTPException(status_code=404, detail=f"No valid chunks found for journal_id: {journal_id}")
+            raise HTTPException(status_code=404, detail=f"No valid chunks found for journal_id: {doc_id}")
 
         formatted = sorted(formatted, key=lambda x: x.get("chunk_index", 0))
 
@@ -168,6 +175,83 @@ def get_journal_chunks(journal_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to retrieve chunks: {str(e)}")
     
 
+# Summary of documents
+@router.get("/api/summary/{doc_id}")
+def generate_summary(doc_id: str):
+    try:
+        results = get_chunks_by_doc_id(doc_id)
+        if not results.get("documents"):
+            raise HTTPException(status_code=404, detail="Document not found")
+
+        # Concatenate all chunk texts
+        combined_text = "\n\n".join(results["documents"])
+
+        prompt = f"Summarize the following academic document:\n\n{combined_text}"
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5
+        )
+
+        summary = response.choices[0].message.content.strip()
+        return {"summary": summary}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Comparison endpoint
+class CompareRequest(BaseModel):
+    doc1_id: str
+    doc2_id: str
+
+@router.post("/api/compare")
+def compare_documents(request: CompareRequest):
+    try:
+        # Retrieve chunks for both documents
+        chunks1 = get_chunks_by_doc_id(request.doc1_id)
+        chunks2 = get_chunks_by_doc_id(request.doc2_id)
+
+        if not chunks1.get("documents") or not chunks2.get("documents"):
+            raise HTTPException(status_code=404, detail="One or both documents not found")
+
+        # Combine all text from both documents
+        text1 = "\n\n".join(chunks1["documents"])
+        text2 = "\n\n".join(chunks2["documents"])
+
+        # Build the comparison prompt
+        prompt = f"""Compare the following two academic documents:
+
+        --- Paper A ({request.doc1_id}) ---
+        {text1}
+
+        --- Paper B ({request.doc2_id}) ---
+        {text2}
+
+        Please generate a structured comparison with the following sections:
+        1. Key Similarities
+        2. Key Differences
+        3. Methods Used
+        4. Topics Covered
+        5. Conclusions
+
+        Be concise and bullet-point the content under each section.
+        """
+
+        # Get response from OpenAI
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5
+        )
+
+        comparison = response.choices[0].message.content.strip()
+        return {"comparison": comparison}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     
 @router.get("/api/debug/list_all_chunks")
 def list_all_chunks():
@@ -175,5 +259,6 @@ def list_all_chunks():
     return {
         "ids": data.get("ids", []),
         "num_chunks": len(data.get("ids", [])),
-        "metadatas": data.get("metadatas", [])[0:3]  # first 3 to keep it light
+        "metadatas": data.get("metadatas", [])
     }
+

@@ -116,13 +116,30 @@ POST /api/similarity_search
 }
 ```
 
-### 3. Get Chunks by Journal
+### 3. Get Chunks by Document
 ```bash
-GET /api/{journal_id}
+GET /api/{doc_id}
 ```
 Example:
 GET /api/extension_brief_mucuna.pdf
 
+
+### 4. Document Summary
+```bash
+GET /api/summary/{doc_id}
+```
+Example:
+GET /api/summary/extension_brief_mucuna.pdf
+
+### 5. Document comparison
+```bash
+POST /api/compare
+
+{
+  "doc1_id": "extension_brief_mucuna.pdf",
+  "doc2_id": "1706.03762v7.pdf"
+}
+```
 
 ## Chatbot Features
 - Answer questions using semantically matched journal content
@@ -145,8 +162,14 @@ Refer to: ```ingestion_design.md```
 
 ## Extra features
 
-I have explored some of the optional stretch features.
-- Frontend UI using Gradio that lets users ask a natural-language question, calls /similarity_search, sends results to an LLM, and displays the generated answer.
+I have explored some of the optional stretch features. They are:
+- **Gradio Chatbot UI** — natural language interface for Q&A
+- **Inline Citations** — answers include [Source X] references
+- **Metadata Viewer** — source details like journal, section, link, year
+- **Plotly Chart** — visualize usage count by chunk
+- **Document Summarization Tab** — generate summaries from selected document
+- **Compare Papers Tab** — structured comparison of two selected documents
+- **Live Source Dropdowns** — document list auto-populated from vector DB
 
 ## Requirements
 Dependencies are listed in ```requirements.txt```
