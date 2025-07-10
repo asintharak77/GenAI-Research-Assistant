@@ -165,6 +165,9 @@ Each chunk is added to the journal_chunks collection in ChromaDB.
 
 
 
+
+
+
 > **Note**:  
 > `id` and `text` are not stored inside `metadata`.  
 > - `id` is stored using the `ids` parameter.  
