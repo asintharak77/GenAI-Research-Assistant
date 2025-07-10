@@ -16,8 +16,10 @@ This is a research assistant tool powered by OpenAI embeddings and LLMs. It inge
 
 ## Project Structure
 
-├── app//
+├── app
+
 │ ├── api.py # FastAPI endpoints
+
 │ ├── main.py # App entry point
 │ ├── embedding.py # Embedding logic (OpenAI)
 │ ├── vector_db.py # ChromaDB integration
