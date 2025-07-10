@@ -32,6 +32,7 @@ This is a research assistant tool powered by OpenAI embeddings and LLMs. It inge
 └── .gitignore
 
 
+```
 ├── app/
 │ ├── api.py # FastAPI endpoints
 │ ├── main.py # App entry point
@@ -44,6 +45,7 @@ This is a research assistant tool powered by OpenAI embeddings and LLMs. It inge
 ├── requirements.txt # Dependencies
 ├── estimates.csv # Time estimates (optional)
 └── .gitignore
+```
 
 ---
 
