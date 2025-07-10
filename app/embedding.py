@@ -10,11 +10,11 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_embedding(text: str) -> list:
     response = openai.embeddings.create(
-        input=[text],  # input must be a list of strings
+        input=[text], 
         model="text-embedding-3-small"
     )
     embedding = response.data[0].embedding
-    print(f"Generated embedding: {embedding[:5]}")  # preview first 5 dims
+    print(f"Generated embedding: {embedding[:5]}") 
     return embedding
 
 

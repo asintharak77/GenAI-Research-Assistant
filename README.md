@@ -174,6 +174,7 @@ I have explored some of the optional stretch features. They are:
 ## Requirements
 Dependencies are listed in ```requirements.txt```
 
-## Demo Video
+## Clear DB
+Type ```rm -rf chroma_db``` in gitbash
 
 

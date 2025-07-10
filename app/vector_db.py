@@ -10,7 +10,7 @@ client = chromadb.PersistentClient(path="chromadb_store")
 collection = client.get_or_create_collection(name="journal_chunks", metadata={"hnsw:space": "cosine"})
 
 def add_chunk_to_db(id: str, embedding: List[float], metadata: Dict):
-    print(f"Embedding preview for {id}: {embedding[:5]}")  # Debug line
+    print(f"Embedding preview for {id}: {embedding[:5]}") 
     collection.add(
         ids=[id],
         embeddings=[embedding],
@@ -22,9 +22,9 @@ def query_chunks(embedding: List[float], k: int):
     results = collection.query(
         query_embeddings=[embedding],
         n_results=k,
-        include=["distances", "metadatas", "documents"]  # include everything needed
+        include=["distances", "metadatas", "documents"] 
     )
-    print(f"Search raw results: {results}")  # for debugging
+    print(f"Search raw results: {results}") 
     return results
 
 def get_chunks_by_doc_id(doc_id: str):
