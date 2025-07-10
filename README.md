@@ -16,7 +16,7 @@ This is a research assistant tool powered by OpenAI embeddings and LLMs. It inge
 
 ## Project Structure
 
-├── app/
+├── app//
 │ ├── api.py # FastAPI endpoints
 │ ├── main.py # App entry point
 │ ├── embedding.py # Embedding logic (OpenAI)
@@ -29,7 +29,19 @@ This is a research assistant tool powered by OpenAI embeddings and LLMs. It inge
 ├── estimates.csv # Time estimates (optional)
 └── .gitignore
 
-<pre> ``` ├── app/ │ ├── api.py # FastAPI endpoints │ ├── main.py # App entry point │ ├── embedding.py # Embedding logic (OpenAI) │ ├── vector_db.py # ChromaDB integration │ └── static/ │ └── sample_json.json # Sample input data ├── chatbot_ui.py # Gradio chatbot frontend ├── ingestion_design.md # Pseudocode + logic for ingestion ├── requirements.txt # Dependencies ├── estimates.csv # Time estimates (optional) └── .gitignore ``` </pre>
+
+├── app/
+│ ├── api.py # FastAPI endpoints
+│ ├── main.py # App entry point
+│ ├── embedding.py # Embedding logic (OpenAI)
+│ ├── vector_db.py # ChromaDB integration
+│ └── static/
+│ └── sample_json.json # Sample input data
+├── chatbot_ui.py # Gradio chatbot frontend
+├── ingestion_design.md # Pseudocode + logic for ingestion
+├── requirements.txt # Dependencies
+├── estimates.csv # Time estimates (optional)
+└── .gitignore
 
 ---
 
