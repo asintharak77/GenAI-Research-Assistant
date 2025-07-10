@@ -71,13 +71,85 @@ python chatbot_ui.py
 
 ## Sample Usage
 
-### Upload file
+### 1. a. Upload file
 ```bash
 PUT /api/upload
 
 {
   "file_url": "http://localhost:8000/static/sample_json.json",
   "schema_version": "1.0"
-}```
+}
+```
+
+### 1. b. Upload chunk
+```bash
+PUT /api/upload
+
+{
+    "chunks": [
+        {
+            "id": document_id,
+            "source_doc_id": ...,
+            "chunk_index": 1,
+            "section_heading": ...,
+            "journal": ...,
+            "publish_year": ...,
+            "usage_count": ...,
+            "attributes": ...,
+            "link": ...,
+            "text": "..."
+        }
+    ],
+    "schema_version": "1.0"
+}
+```
+
+### 2. Similarity search
+```bash
+POST /api/similarity_search
+
+{
+  "query": "What are the uses of velvet bean?",
+  "k": 3,
+  "min_score": 0.25
+}
+```
+
+### 3. Get Chunks by Journal
+```bash
+GET /api/{journal_id}
+```
+Example:
+GET /api/extension_brief_mucuna.pdf
+
+
+## Chatbot Features
+- Answer questions using semantically matched journal content
+- Citations include: source, section, journal, year, score
+- Interactive usage chart (Plotly)
+
+## Sample JSON
+Located at: ```app/static/sample_json.json```
+
+## Ingestion Pipeline Design
+For design pseudocode and explanations of:
+- Chunking logic
+- Metadata schema
+- Embedding generation
+- Storage flow in ChromaDB
+
+Choice of VectorDB is also discussed here.
+
+Refer to: ```ingestion_design.md```
+
+## Extra features
+
+I have explored some of the optional stretch features.
+- Frontend UI using Gradio that lets users ask a natural-language question, calls /similarity_search, sends results to an LLM, and displays the generated answer.
+
+## Requirements
+Dependencies are listed in ```requirements.txt```
+
+## Demo Video
 
 
